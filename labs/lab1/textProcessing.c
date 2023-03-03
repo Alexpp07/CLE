@@ -63,11 +63,10 @@ int f_getc(FILE *fp) {
 }
 
 int main(int argc, char *argv[]) {
-    int words = 0; int as = 0; int es = 0; int is = 0; int os = 0; int us = 0; int ys = 0;
-    int previousVowelCheck[6] = {0,0,0,0,0,0};
-    bool inWord = false;
-
     for (int i=1; i<argc; i++){
+        int words = 0; int as = 0; int es = 0; int is = 0; int os = 0; int us = 0; int ys = 0;
+        int previousVowelCheck[6] = {0,0,0,0,0,0};
+        bool inWord = false;
         int byte, lbyte;
         char vowel;
         FILE *fp;
@@ -78,6 +77,8 @@ int main(int argc, char *argv[]) {
             printf("Error! File %s not found.\n", argv[i]);
             exit(1);
         }
+
+        printf("\nFile name: %s\n", argv[i]);
 
         while (1){
             while (EOF != (byte = f_getc(fp))){
@@ -125,10 +126,10 @@ int main(int argc, char *argv[]) {
             if (byte == EOF) break;
         }
         fclose(fp);
-    }
 
-    printf("%d \n", words);
-    printf("A: %d\nE: %d\nI: %d\nO: %d\nU: %d\nY: %d\n", as, es, is, os , us, ys);
+        printf("Total number of words = %d \n", words);
+        printf("A: %d   E: %d   I: %d   O: %d   U: %d   Y: %d\n", as, es, is, os , us, ys);
+    }
 
     return 0;
 }
