@@ -5,29 +5,31 @@
 #include <string.h>
 
 char is_vowel(int c){
-    printf("before %X\n",c);
-    if (c >= 0xE0) 
+    if (c >= 0xE0)
         c = c - 0x20;  // upper case
-    printf("after %X\n",c);
-    // A ou ÀÁÂÃ
-    if (c == 0x41 || (0xC0 <= c && c <= 0xC3))
+    // a ou AÀÁÂÃ
+    if (c == 0x61 || c == 0x41 || (0xC0 <= c && c <= 0xC3))
         return 'A'; 
     
-    // E ou ÈÉÊ
-    if (c == 0x45 || (0xC8 <= c && c <= 0xCA))
+    // e ou EÈÉÊ
+    if (c == 0x65 || c == 0x45 || (0xC8 <= c && c <= 0xCA))
         return 'E'; 
 
-    // I ou ÌÍ
-    if (c == 0x49 || (0xCC <= c && c <= 0xCD))
+    // i ou IÌÍ
+    if (c == 0x69 || c == 0x49 || (0xCC <= c && c <= 0xCD))
         return 'I'; 
     
-    // O ou ÒÓÔÕ
-    if (c == 0x4F || (0xD2 <= c && c <= 0xD5))
+    // o ou OÒÓÔÕ
+    if (c == 0x6F || c == 0x4F || (0xD2 <= c && c <= 0xD5))
         return 'O'; 
     
-    // U ou ÙÚ
-    if (c == 0x55 || (0xD9 <= c && c <= 0xDA))
+    // u ou UÙÚ
+    if (c == 0x75 || c == 0x55 || (0xD9 <= c && c <= 0xDA))
         return 'U';
+
+    // y ou Y
+    if (c == 0x79 || c == 0x59)
+        return 'Y';
     
     return 'n';
 }
@@ -61,8 +63,8 @@ int f_getc(FILE *fp) {
 }
 
 int main(int argc, char *argv[]) {
-    int words = 0; int as = 0; int es = 0; int is = 0; int os = 0; int us = 0;
-    int previousVowelCheck[5] = {0,0,0,0,0};
+    int words = 0; int as = 0; int es = 0; int is = 0; int os = 0; int us = 0; int ys = 0;
+    int previousVowelCheck[6] = {0,0,0,0,0,0};
     bool inWord = false;
 
     for (int i=1; i<argc; i++){
@@ -105,6 +107,10 @@ int main(int argc, char *argv[]) {
                         us++;
                         previousVowelCheck[4] = 1;
                     }
+                    else if (vowel == 'Y' && previousVowelCheck[5] == 0){
+                        ys++;
+                        previousVowelCheck[5] = 1;
+                    }
                 }
                 else{
                     previousVowelCheck[0] = 0;
@@ -112,6 +118,7 @@ int main(int argc, char *argv[]) {
                     previousVowelCheck[2] = 0;
                     previousVowelCheck[3] = 0;
                     previousVowelCheck[4] = 0;
+                    previousVowelCheck[5] = 0;
                     inWord = false;
                 }
             }
@@ -121,7 +128,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("%d \n", words);
-    printf("A: %d\nE: %d\nI: %d\nO: %d\nU: %d\n", as, es, is, os ,us);
+    printf("A: %d\nE: %d\nI: %d\nO: %d\nU: %d\nY: %d\n", as, es, is, os , us, ys);
 
     return 0;
 }
