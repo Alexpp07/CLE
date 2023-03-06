@@ -34,16 +34,24 @@ char is_vowel(int c){
     return 'n';
 }
 
-int is_alpha(int c){
+int is_alpha_numeric(int c, bool inWord){
     if (c >= 0xE0) c -= 0x20;  // upper case
+
+    if (c == 0x1FF9 || c == 0x1FF8) c = 0x27;  // convert single quotation marks to apostrophe
+
+    if (c == 0x27 && inWord == false)   // if an apostrophe is alone then is not considered to be counted as a word
+        return false;
+
     // a-z A-Z
     return ((0x41 <= c && c <= 0x5A) || (0x61 <= c && c <= 0x7A)) || 
-        // apostrophe ('), cedilla (Ç)
-        c == 0x27 || c == 0xC7 || 
+        // apostrophe ('), cedilla (Ç), underscore (_)
+        c == 0x27 || c == 0xC7 || c == 0x5F ||
         // ÀÁÂÃ ÈÉÊ ÌÍ
         (0xC0 <= c && c <= 0xC3) || (0xC8 <= c && c <= 0xCA) || (0xCC <= c && c <= 0xCD) ||
         // ÒÓÔÕ ÙÚ
-        (0xD2 <= c && c <= 0xD5) || (0xD9 <= c && c <= 0xDA);
+        (0xD2 <= c && c <= 0xD5) || (0xD9 <= c && c <= 0xDA) ||
+        // 1 2 3 4 5 6 7 8 9
+        (0x30 <= c && c <= 0x39);
 }
 
 int f_getc(FILE *fp) {
@@ -82,7 +90,7 @@ int main(int argc, char *argv[]) {
 
         while (1){
             while (EOF != (byte = f_getc(fp))){
-                if (is_alpha(byte)){
+                if (is_alpha_numeric(byte, inWord)){
                     if (inWord == false){
                         inWord = true;
                         words++;
