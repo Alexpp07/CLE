@@ -5,26 +5,26 @@
 #include <string.h>
 
 char is_vowel(int c){
-    if (c >= 0xE0)
+    if (c >= 0xE0)  // 0xE0 -> à => if is bigger then 0xE0 it will convert the character in unicode to its uppercase equivalent 
         c = c - 0x20;  // upper case
     // a ou AÀÁÂÃ
-    if (c == 0x61 || c == 0x41 || (0xC0 <= c && c <= 0xC3))
+    if ( c == 0x41 || (0xC0 <= c && c <= 0xC3))
         return 'A'; 
     
     // e ou EÈÉÊ
-    if (c == 0x65 || c == 0x45 || (0xC8 <= c && c <= 0xCA))
+    if (c == 0x45 || (0xC8 <= c && c <= 0xCA))
         return 'E'; 
 
     // i ou IÌÍ
-    if (c == 0x69 || c == 0x49 || (0xCC <= c && c <= 0xCD))
+    if ( c == 0x49 || (0xCC <= c && c <= 0xCD))
         return 'I'; 
     
     // o ou OÒÓÔÕ
-    if (c == 0x6F || c == 0x4F || (0xD2 <= c && c <= 0xD5))
+    if ( c == 0x4F || (0xD2 <= c && c <= 0xD5))
         return 'O'; 
     
     // u ou UÙÚ
-    if (c == 0x75 || c == 0x55 || (0xD9 <= c && c <= 0xDA))
+    if ( c == 0x55 || (0xD9 <= c && c <= 0xDA))
         return 'U';
 
     // y ou Y
