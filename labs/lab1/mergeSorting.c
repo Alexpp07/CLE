@@ -9,6 +9,14 @@
 void merge(int arr[], int l, int m, int r) {
     int i, j, k;
 
+    // Find sizes of two subarrays
+    int left_size = m - l + 1;
+    int right_size = r - m;
+
+    // Create temporary arrays for left and right subarrays
+    int *L = malloc(left_size * sizeof(int));
+    int *R = malloc(right_size * sizeof(int));
+
     // size of first array
     int n1 = m - l + 1;
 
@@ -16,7 +24,7 @@ void merge(int arr[], int l, int m, int r) {
     int n2 = r - m;
 
     // create temporary arrays you the size of the arrays
-    int L[n1], R[n2];
+    //int L[n1], R[n2];
 
     // values are copied into the arrays
     for (i = 0; i < n1; i++)
@@ -77,8 +85,6 @@ void mergeSort(int arr[], int l, int r) {
     }
 }
 
-
-
 int main(int argc, char *argv[]) {
 
     // how to use this script
@@ -99,22 +105,29 @@ int main(int argc, char *argv[]) {
 
     // count the number of integers
     fseek(fp, 0, SEEK_END);
-    long count = ftell(fp) / sizeof(int);
+    int size = ftell(fp) / sizeof(int);
     fseek(fp, 0, SEEK_SET);
 
-    int arr[count];
+    // int arr[count];
+    int *arr = malloc(size * sizeof(int));
     // reads one integer at a time from the binary file
-    fread(arr, sizeof(int), count, fp);
+    int count = fread(arr, sizeof(int), size, fp);
+
+    if (count != size)
+    {
+        printf("Error: could not read all integers from file\n");
+        return 1;
+    }
 
     // close binary file
     fclose(fp);
 
     // merge sort
-    mergeSort(arr, 0, count - 1);
+    mergeSort(arr, 0, size - 1);
 
     // print sorted array
     printf("Sorted array: ");
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < size; i++) {
         printf("%d ", arr[i]);
     }
     printf("\n");

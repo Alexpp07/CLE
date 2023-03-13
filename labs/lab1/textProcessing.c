@@ -55,19 +55,32 @@ int is_alpha_numeric(int c, bool inWord){
 }
 
 int f_getc(FILE *fp) {
-  int bytes, ch = fgetc(fp);
-  if (ch == EOF) return EOF;
-  if ((ch & 0x80) == 0) return ch;
+	// reads the first byte 
+	int bytes, ch = fgetc(fp);
+	// if the first byte is EOF, returns EOF
+	if (ch == EOF) return EOF;
 
-  for (bytes = 1; ch & (0x80 >> bytes); bytes++);
-  ch &= (1 << (7 - bytes)) - 1;
+	// if the first byte is a single-byte character
+	// returns that byte as the Unicode code point
+	if ((ch & 0x80) == 0) return ch;
 
-  for (; bytes > 1; bytes--) {
-    int c = fgetc(fp);
-    if (c == EOF) return EOF;
-    ch = (ch << 6) | (c & 0x3F);
-  }
-  return ch;
+	// determine the size of the utf-8 character sequence
+	// bytes will increment if (ch & (0x80 >> bytes)) is not 0
+	for (bytes = 1; ch & (0x80 >> bytes); bytes++);
+
+	// extracting the most significant bits of the first byte of the sequence
+	ch &= (1 << (7 - bytes)) - 1;
+
+	// combining the first byte with the subsequent sequence
+	for (; bytes > 1; bytes--) {
+		// reading the next byte 
+		int c = fgetc(fp);
+		// returning EOF to indicate an error has ocurred
+		if (c == EOF) return EOF;
+		// combining c with ch 
+		ch = (ch << 6) | (c & 0x3F);
+	}
+	return ch;
 }
 
 int main(int argc, char *argv[]) {
