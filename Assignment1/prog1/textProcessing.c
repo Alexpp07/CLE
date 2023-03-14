@@ -7,7 +7,6 @@
 #include <string.h>
 
 
-
 static void processFileName(int argc, char *argv[], char *fileNames[]);
 
 static void printResults();
@@ -86,6 +85,12 @@ void processFileName(int argc, char *argv[], char *fileNames[]){
 /*  */
 void printResults(){
 
+    if ((pthread_mutex_lock (&accessCR)) != 0) {                  
+       perror ("error on entering monitor(CF)");
+       int status = EXIT_FAILURE;
+       pthread_exit(&status);
+    }
+
     for (int i=0; i<numberOfFiles; i++) {
         printf("\nFile name: %s\n",mem[i].file_name);
         printf("Number total of words: %d\n",mem[i].total_num_of_words);
@@ -95,6 +100,12 @@ void printResults(){
         printf("O: %d\n",mem[i].count_total_vowels[3]);
         printf("U: %d\n",mem[i].count_total_vowels[4]);
         printf("Y: %d\n",mem[i].count_total_vowels[5]);
+    }
+
+    if ((pthread_mutex_unlock (&accessCR)) != 0) {                                              
+       perror ("error on exiting monitor(CF)");
+       int status = EXIT_FAILURE;
+       pthread_exit(&status);
     }
 
 }
