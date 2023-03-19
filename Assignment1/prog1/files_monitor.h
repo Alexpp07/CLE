@@ -1,5 +1,5 @@
 /**
- *  \file counters.h (interface file)
+ *  \file files_monitor.h (interface file)
  *
  *  \brief Problem name: Count Words.
  *
@@ -11,11 +11,11 @@
  *  Data transfer region implemented as a monitor.
  *
  *  Definition of the operations carried out by the main thread:
- *     \li storeFileNames
+ *     \li processFileName
  *     \li printResults
  * 
  *  Definition of the operations carried out by the workers:
- *     \li saveResults
+ *     \li savePartialResults
  *
  *  \author Eduardo Rocha Fernandes - 98512
  *  \author Alexandre Pinto - 

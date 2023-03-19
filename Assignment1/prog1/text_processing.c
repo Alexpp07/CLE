@@ -8,8 +8,30 @@
 
 #include "files_monitor.h"
 
+/** \brief struct to manage the variables of a chunk*/
+struct ParRes{
+    int numberOfWords;  /* Total number of words*/
+    int vowelWords[6];  /* Number of words containing each vowel (a,e,i,o,u,y) */
+    int fileID;         /* File id of the chunk */
+};
+
+/* Id of the file from where the chunk is */
+int fileID;
+
+/* Variable crated for the purpose of knowing if the file was opened*/
+bool openFile;
+
+/** \brief worker threads return status array */
+int *workersStatus;
+
+/** \brief worker life cycle routine */
+static void *worker(void *par);
+
 /** \brief locking flag which warrants mutual exclusion inside the monitor */
 static pthread_mutex_t accessCR = PTHREAD_MUTEX_INITIALIZER;
+
+/** \brief number of worker threads */
+#define THREAD_NUMBER 2
 
 /*  */
 int main(int argc, char *argv[]){
@@ -18,12 +40,72 @@ int main(int argc, char *argv[]){
    char *fileNames[argc-1];
    processFileName(argc, argv, fileNames);
 
+   /* Create worker threads */
+   pthread_t th[THREAD_NUMBER];
+   unsigned int workers[THREAD_NUMBER];
+   workersStatus = malloc(THREAD_NUMBER * sizeof(int));   /* Allocate memory to save the status of each worker */
+   int *status_p;                                           /* pointer to execution status */
+   int i;
+   for (i=0; i<THREAD_NUMBER; i++){
+      if(pthread_create(&th[i], NULL, worker, &workers[i]) != 0){
+         perror("Failed to create thread");
+         exit (EXIT_FAILURE);
+      }
+   }
+
+
    /* generate the chunks to be processed by the workers threads*/
-   
+
 
    //printResults();
 
-   return 0;
+   /* waiting for the termination of the intervening entities threads */
+
+   printf ("\nFinal report\n");
+   for (i = 0; i < THREAD_NUMBER; i++){ 
+      if (pthread_join (th[i], (void *) &status_p) != 0){                               /* thread worker */
+         perror ("error on waiting for worker thread");
+         exit(EXIT_FAILURE);
+      }
+      printf ("thread worker, with id %u, has terminated: ", i);
+      printf ("its status was %d\n", *status_p);
+   }
+
+  // printf ("\nElapsed time = %.6f s\n", get_delta_time ());
+}
+
+/**
+ *  \brief Function worker.
+ *
+ *  Its role is to simulate the life cycle of a worker.
+ *
+ *  \param par pointer to application defined worker identification
+ */
+static void *worker(void *par) {
+    
+    unsigned int id = *((unsigned int *) par);      // worker id
+
+    printf("worker\n");
+    
+    // while (readTextChunk())
+    // {
+    //    //processTextChunk();
+
+    //    //savePartialResults();
+    // }
+
+    workersStatus[id] = EXIT_SUCCESS;
+    pthread_exit (&workersStatus[id]);
+    
+}
+
+/* Fucntion created to get the next chunk of text, and returns true if it was successful */
+bool readTextChunk(unsigned char *buffer, int *psize, struct ParRes *parRes){
+    return true;
+}
+
+static void processTextChunk(unsigned char *buffer, int *psize, struct ParRes *parRes){
+
 }
 
 /*  
