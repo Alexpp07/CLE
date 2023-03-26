@@ -6,7 +6,7 @@ RM = rm -f
 .PHONY: all prog1 clean
 
 prog1:
-	$(CC) $(CFLAGS) -o prog1 text_processing.c files_monitor.c -lpthread -lm
+	$(CC) $(CFLAGS) -o prog1 textProcessing.c sharedRegion.c textProcessingFunctions.c -lpthread -lm
 
 clean veryclean:
 	$(RM) prog1
