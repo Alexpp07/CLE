@@ -29,8 +29,6 @@ static char *fileName;
 /** @brief Array of partial integers  */
 int* partial_array;
 
-uint32_t previousPower2(uint32_t x);
-
 
 int main(int argc, char *argv[]) {
 
