@@ -29,6 +29,8 @@ static char *fileName;
 /** @brief Array of partial integers  */
 int* partial_array;
 
+uint32_t previousPower2(uint32_t x);
+
 
 int main(int argc, char *argv[]) {
 
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_ARE_FATAL);
 
 
-    //printf("Process with rank %d initialization\n", rank);
+    // printf("Process with rank %d initialization\n", rank);
 
 
     // Get and process command line arguments
@@ -103,8 +105,8 @@ int main(int argc, char *argv[]) {
 
 
     // Allocate memory for full array and partial array
-    integersArray = (int*) malloc(num_integers * sizeof(int));
-    partial_array = (int*) malloc(num_integers * sizeof(int));
+    integersArray = malloc(num_integers * sizeof(int));
+    partial_array = malloc(num_integers * sizeof(int));
     if ((integersArray == NULL)||(partial_array == NULL)) {
         printf("Error: memory allocation failed\n");
         MPI_Finalize();
@@ -153,30 +155,28 @@ int main(int argc, char *argv[]) {
 
 
     //printf(" Array (rank %d): %d %d\n", rank, integersArray[0],integersArray[1]);
-
-
-    int total_iterations = size; // total iterations
-
-
-    // run the number of iterations needed
-    for (int iteration = total_iterations; iteration >=1; iteration = round(iteration/2)) {
-
-        MPI_Comm new_comm;
-        int color = (rank <= iteration) ? 0 : 1;
-        MPI_Comm_split(comm, color, rank, &new_comm);
-        comm = new_comm;
-
-        if (color == 1){ // remove the processes not needed
-            break;
+    
+    
+    // Run the number of iterations needed
+    if (size==1){
+        mergeSort(integersArray, num_integers);
+    } else{
+        int iteration = 1;
+        while (iteration < size) {
+            MPI_Comm new_comm;
+            int color = (rank < iteration) ? 0 : 1;
+            MPI_Comm_split(comm, color, rank, &new_comm);
+            if (color == 0) {
+                int chunk_size = num_integers / iteration;
+                MPI_Scatter(integersArray, chunk_size, MPI_INT, partial_array, chunk_size, MPI_INT, 0, new_comm);
+                mergeSort(partial_array, chunk_size);
+                MPI_Gather(partial_array, chunk_size, MPI_INT, integersArray, chunk_size, MPI_INT, 0, new_comm);
+                comm = new_comm;
+            } else {
+                break;
+            }
+            iteration *= 2;
         }
-
-        int chunk_size = num_integers/iteration;
-
-        MPI_Scatter(integersArray, chunk_size, MPI_INT, partial_array, chunk_size, MPI_INT, 0, comm);
-
-        mergeSort(partial_array,chunk_size); // Sorting the chunk using merge sort
-
-        MPI_Gather(partial_array, chunk_size, MPI_INT, integersArray, chunk_size, MPI_INT, 0, comm);
     }
 
 
@@ -185,8 +185,9 @@ int main(int argc, char *argv[]) {
         resultsOK = verifyResults();
         if (!resultsOK){
             printf("ERROR : final results are NOT OK.\n");
-            free(integersArray);
-            free(partial_array);
+            //free(integersArray);
+            //free(partial_array);
+            printf("Process with rank %d finished working\n", rank);
             MPI_Finalize();
             exit(EXIT_FAILURE);
         }
@@ -203,16 +204,13 @@ int main(int argc, char *argv[]) {
         printf("The program took %f seconds to execute\n", time_spent);
     }
 
-
     // Dealocate memory
-    if (rank!=0){
-        free(integersArray);
-        free(partial_array);
-    }
-    
+    free(integersArray);
+    free(partial_array);
 
-    //printf("Process with rank %d finished working\n", rank);    
-    
+
+    //printf("Process with rank %d finished working\n", rank);
+
 
     MPI_Finalize();
     exit(EXIT_SUCCESS);
@@ -253,8 +251,9 @@ void merge(int* arr, int l, int m, int r) {
     int n2 = r - m;
 
     // create temporary arrays you the size of the arrays
-    int *L = (int*) malloc(n1 * sizeof(int));
-    int *R = (int*) malloc(n2 * sizeof(int));
+    //int L[n1], R[n2];
+    int *L = malloc(n1 * sizeof(int));
+    int *R = malloc(n2 * sizeof(int));
 
     // values are copied into the arrays
     for (i = 0; i < n1; i++)
@@ -319,4 +318,16 @@ void mergeSort(int* arr, int n) {
             merge(arr, left_start, mid, right_end);
         }
     }
+}
+
+uint32_t previousPower2(uint32_t x) {
+    if (x == 0) {
+        return 0;
+    }
+    x |= (x >> 1);
+    x |= (x >> 2);
+    x |= (x >> 4);
+    x |= (x >> 8);
+    x |= (x >> 16);
+    return x - (x >> 1);
 }
