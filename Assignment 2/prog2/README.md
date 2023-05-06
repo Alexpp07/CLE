@@ -7,5 +7,5 @@ mpicc sorting.c -o sorting -lm
 
 #### Run
 ```
-mpirun -np [number_processes] ./sorting
+mpirun -np [number_processes] ./sorting [file_name]
 ```
