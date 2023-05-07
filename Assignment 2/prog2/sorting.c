@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     int rank, size; // rank and size
     bool resultsOK = false; // store if the final results are OK
     bool ready_2_sort = false; // is the program ready to sort?
-    FILE* file; // file
+    FILE* file = NULL; // file
     int res; // response from file
 
     MPI_Init(&argc, &argv);
