@@ -30,7 +30,7 @@ static bool readTextChunk(struct Chunk *chunk, struct ParRes *parRes, int worker
 int splitTextIntoChunks(FILE *file, char **chunks);
 
 /** \brief function that returns the Unicode code points for the characters in the chunk */
-int f_getc(unsigned char **chunk_pointer, struct State *state);
+int f_getc(unsigned char chunk_pointer, struct State *state);
 
 /** \brief function that check what vowel a byte is */
 char is_vowel(int c);
@@ -53,21 +53,9 @@ int workStatus;
 /** \brief number of worker threads */
 #define CHUNK_SIZE 4096
 
-#define MPI_DEBUG() {           \
-    int i = 0;                  \
-    char hostname[256];            \    
-    gethostname(hostname, sizeof(hostname));    \
-    printf("PID %d on %s ready for attach.\n", getpid(), hostname);      \
-    fflush(stdout);             \
-    while (!i)                         \
-        if (fopen("continue.txt", "r"))\
-            i = 1;                     \
-}
-
 int main(int argc, char *argv[]) {
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
-    //MPI_DEBUG();
 
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -120,8 +108,8 @@ int main(int argc, char *argv[]) {
 
         (void) get_delta_time ();
 
-        int current_process = 1;  // Id of worker that will receive next chunk to process
-        int chunks_sent = 0;
+        int current_process = 1;  // rank of the process to assign next chunk
+        int chunks_sent = 0;      // chunks that were send by the dispatcher
 
         /* save filenames in the shared region and initialize counters to 0 */
         char *fileNames[nFiles];
@@ -153,12 +141,14 @@ int main(int argc, char *argv[]) {
 
             /* save the chunks */
             for (int j = 0; j < chunk_index; j++) {
+                
                 int length = (int) strlen(chunks[j]);
                 /* send to the worker: */
                 MPI_Send(&workStatus, 1, MPI_INT, current_process, 0, MPI_COMM_WORLD); /* a flag saying if there is work to do */
                 MPI_Send(&length, 1, MPI_INT, current_process, 0, MPI_COMM_WORLD);/* the size of the chunk */
                 MPI_Send(&i, 1, MPI_INT, current_process, 0, MPI_COMM_WORLD);/* the fileID */
                 MPI_Send(chunks[j], CHUNK_SIZE, MPI_UNSIGNED_CHAR, current_process, 0, MPI_COMM_WORLD);/* the chunk buffer */
+
                 /* Update current_worker_to_receive_work and number_of_chunks_sent variables */
                 current_process = (current_process%nProcesses)+1;
                 chunks_sent++;
@@ -218,8 +208,6 @@ int main(int argc, char *argv[]) {
  *  \param par pointer to application defined worker identification
  */
 static void worker(int rank) {
-
-    MPI_Request reqSnd;
 
     struct ParRes parRes;
     struct Chunk chunk;
