@@ -93,8 +93,6 @@ int main(int argc, char *argv[]) {
                     }
                     printUsage(argv[0]);
                     return EXIT_FAILURE;
-                case 'lldb':
-                    break;
                 default:
                     abort();
             }
@@ -141,7 +139,7 @@ int main(int argc, char *argv[]) {
 
             /* save the chunks */
             for (int j = 0; j < chunk_index; j++) {
-                
+
                 int length = (int) strlen(chunks[j]);
                 /* send to the worker: */
                 MPI_Send(&workStatus, 1, MPI_INT, current_process, 0, MPI_COMM_WORLD); /* a flag saying if there is work to do */
