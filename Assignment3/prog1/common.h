@@ -3,6 +3,8 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 #define CHECK(call)                                                            \
 {                                                                              \
     const cudaError_t error = call;                                            \

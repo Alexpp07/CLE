@@ -234,8 +234,10 @@ int main (int argc, char **argv)
 
   /*NEW*/
 
+  verifyResults();
+
   // Deallocate memory
-  free(integersArray)
+  free(integersArray);
   
   /*NEW end*/
   
@@ -247,6 +249,109 @@ int main (int argc, char **argv)
   free (modified_device_sector_data);
 
   return 0;
+}
+
+/*
+Function to verify if the integers in the final array are sorted correctly
+*/
+bool verifyResults(){
+    printf("\n Final Verification\n");
+
+    int i;
+    for (i = 0; i < num_integers - 1; i++)
+        if (integersArray[i] > integersArray[i + 1])
+        {   
+            printf("  Error on file %s!\n", fileName);
+            printf("  Error in position %d between element %d and %d\n",
+                i, integersArray[i], integersArray[i + 1]);
+            return false;
+        }
+    if (i == (num_integers - 1))
+        printf(" Everything is OK for file %s\n", fileName);
+    return true;
+}
+
+
+/*
+Function to merge
+*/
+void merge(int* arr, int l, int m, int r) {
+    int i, j, k;
+
+    // size of first array
+    int n1 = m - l + 1;
+
+    // size of second array
+    int n2 = r - m;
+
+    // create temporary arrays you the size of the arrays
+    //int L[n1], R[n2];
+    int *L = malloc(n1 * sizeof(int));
+    int *R = malloc(n2 * sizeof(int));
+
+    // values are copied into the arrays
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = l;
+
+    // iterates through the two subarrays, comparing the values at each index and inserting them into the correct position in the final sorted array arr
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    // any remaining elements in L or R are copied over to the final sorted array
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+
+    free(R);
+    free(L);
+}
+
+
+
+/*
+Function to merge sort 
+*/
+void mergeSort(int* arr, int n) {
+    int curr_size;
+    int left_start;
+
+    // Merge subarrays in bottom-up manner
+    for (curr_size = 1; curr_size <= n-1; curr_size = 2*curr_size) {
+        // Pick starting point of different subarrays of current size
+        for (left_start = 0; left_start < n-1; left_start += 2*curr_size) {
+            // Find ending point of left subarray
+            int mid = left_start + curr_size - 1;
+
+            // Find ending point of right subarray
+            int right_end = MIN(left_start + 2*curr_size - 1, n-1);
+
+            // Merge subarrays arr[left_start...mid] and arr[mid+1...right_end]
+            merge(arr, left_start, mid, right_end);
+        }
+    }
 }
 
 static void modify_sector_cpu_kernel (unsigned int *sector_data, unsigned int sector_number, unsigned int n_sectors,
